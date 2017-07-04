@@ -29,7 +29,7 @@ Został napisany na jako projekt na przedmiot Systemy Operacyjne.
 * Czynności powtórzyć dla drugiego programu
 
 ## Konfiguracja
-* Plik w katalogu edytora (klienta) `ConfigSOE`
+* Plik w katalogu edytora (klienta) `configSOE`
 * Ma w pierwszej linii adres IP (v4), w drugiej numer portu.
   ```
   127.0.0.1
@@ -59,7 +59,7 @@ Project created for the Operating Systems course.
 
 You can build both client and server (separately) with `qmake` and then `make`, then run the server with `./sysOpyServer 6000` (where 6000 is an examplary port number) and the client with `./sysOpyEditor`.
 
-You can modify client's listening IP address and port number by editing `ConfigSOE` in editor's directory. It's default content is:
+You can modify client's listening IP address and port number by editing `configSOE` in editor's directory. It's default content is:
 ```
 127.0.0.1
 6000

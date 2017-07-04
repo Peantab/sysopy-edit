@@ -11,14 +11,29 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
 using namespace std;
 
 const string FILENAME = "document.txt";
+int sockListener; // Initialized before setting handler
+string* documentForSigint = NULL;
 
 void sendMessage(int sock, const char* message, int flags);
 string receiveMessage(int fd);
 void saveDocument(string document);
+
+void sigint(int signal){
+    // Close a listener for IPv4 connections
+    shutdown(sockListener, SHUT_RDWR);
+    close(sockListener);
+
+    // Save document
+    saveDocument(*documentForSigint);
+
+    // Everything is fine, it was planned.
+    exit(0);
+}
 
 int main(int argc, char *argv[])
 {
@@ -38,6 +53,7 @@ int main(int argc, char *argv[])
 
     // Read entire file (if exists) to a String.
     string document(static_cast<stringstream const&>(stringstream() << documentFile.rdbuf()).str());
+    documentForSigint = &document;
     if (document.length() == 0) document = "***Empty document***";
 
     // Networking.
@@ -46,7 +62,7 @@ int main(int argc, char *argv[])
     vector<struct pollfd> polled;
 
     // Prepare a listener for IPv4 connections
-    int sockListener = socket(AF_INET, SOCK_STREAM, 0);
+    sockListener = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in addressIP4;
     addressIP4.sin_family = AF_INET;
     addressIP4.sin_port = port;
@@ -59,6 +75,13 @@ int main(int argc, char *argv[])
     sIP4.revents = 0;
     polled.push_back(sIP4);
     cout << "OK" << endl;
+
+    // Register SIGINT handler.
+    struct sigaction act;
+    act.sa_handler = sigint;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    sigaction(SIGINT, &act, NULL);
 
     bool keepRunning = true;
     while(keepRunning){
